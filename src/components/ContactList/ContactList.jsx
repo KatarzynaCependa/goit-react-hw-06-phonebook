@@ -1,34 +1,32 @@
-import PropTypes from 'prop-types';
+// useSelector pozwala na dostęp do stanu w Redux store
+import { useSelector } from 'react-redux';
 import css from 'components/ContactList/ContactList.module.css';
+import { Contact } from 'components/Contact/Contact';
 
-export const ContactList = ({ onClick, contacts }) => {
-  const deleteData = (evt, contactId) => {
-    onClick(contactId);
-  };
+const getVisibleContacts = (contacts, filteredContacts) => {
+  if (filteredContacts === '') {
+    return contacts;
+  } else {
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filteredContacts.filter)
+    );
+  }
+};
+
+export const ContactList = () => {
+  // pobiera listę kontaktów ze stanu Redux store za pomocą useSelector i przypisuje do zmiennej contacts
+  const contacts = useSelector(state => state.contacts);
+  // pobiera wartość filtru kontaktów
+  const filteredContacts = useSelector(state => state.filters);
+  const visibleContacts = getVisibleContacts(contacts, filteredContacts);
 
   return (
     <ul>
-      {contacts.map(contact => {
-        return (
-          <div key={contact.id}>
-            <li className={css.listEl}>
-              {contact.name}: {contact.number}
-              <button
-                type="button"
-                onClick={evt => deleteData(evt, contact.id)}
-                className={css.delBtn}
-              >
-                Delete
-              </button>
-            </li>
-          </div>
-        );
-      })}
+      {visibleContacts.map(contact => (
+        <li key={contact.id} className={css.listEl}>
+          <Contact contact={contact} />
+        </li>
+      ))}
     </ul>
   );
-};
-
-ContactList.propTypes = {
-  contacts: PropTypes.array.isRequired,
-  onClick: PropTypes.func,
 };
